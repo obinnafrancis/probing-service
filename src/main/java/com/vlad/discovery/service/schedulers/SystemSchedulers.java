@@ -9,6 +9,7 @@ import com.vlad.discovery.service.model.RemoteResponse;
 import com.vlad.discovery.service.util.RemoteCallUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ public class SystemSchedulers {
     RemoteCallUtil remoteCallUtil;
     @Autowired
     ProbeServiceRepository probeServiceRepository;
+    @Value("${max.down.threshold:6}")
+    int maxDownThreshold;
 
     @Scheduled(fixedRate = 10000,initialDelay = 5000)
     public void probingTask(){
@@ -50,12 +53,23 @@ public class SystemSchedulers {
             ServiceInformation newState = ServiceInformation.builder()
                     .domainId(serviceInformation.getDomainId())
                     .down(serviceInformation.isDown())
+                    .downCount(serviceInformation.getDownCount()+1)
                     .serviceName(serviceInformation.getServiceName())
                     .serviceId(serviceInformation.getServiceId())
                     .build();
+            if(!currentState){
+                newState.setDownCount(0);
+                probeServiceRepository.updateService(newState);
+                sendMailOut(newState);
+                return;
+            }
+            if(currentState && serviceInformation.getDownCount()==maxDownThreshold){
+                probeServiceRepository.updateService(newState);
+                sendMailOut(newState);
+                return;
+            }
             probeServiceRepository.updateService(newState);
             log.info("State change occured ... sending notification out for {}",serviceInformation.getStatusFieldName());
-            sendMailOut(newState);
         }
     }
 
