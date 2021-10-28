@@ -42,7 +42,7 @@ public class ProbeServiceRepository {
         Criteria serviceNameCriteria = Criteria.where(NAME).is(serviceName);
         Criteria domainCriteria = Criteria.where(CLIENT_ID).is(domainId);
         Query query = new Query(new Criteria().andOperator(Arrays.asList(serviceNameCriteria,domainCriteria)));
-        return Optional.of(mongoTemplate.findOne(query,ServiceInformation.class));
+        return Optional.ofNullable(mongoTemplate.findOne(query,ServiceInformation.class));
     }
 
     public List<ServiceInformation>getAllServices(){
