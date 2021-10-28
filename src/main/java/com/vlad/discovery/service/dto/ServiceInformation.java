@@ -18,6 +18,7 @@ public class ServiceInformation {
     private String statusFieldName;
     private String statusExpectedValue;
     private String url;
+    private int downCount;
     private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedOn;
     private boolean down;
