@@ -12,6 +12,8 @@ public class ServiceModel {
     @NonNull
     private String probeUrl;
     @NonNull
+    private String stakeholdersEmail;
+    @NonNull
     private transient String statusFIeldName;
     private transient String expectedValue;
     private LocalDateTime lastUpdatedOn;

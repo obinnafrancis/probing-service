@@ -41,7 +41,7 @@ public class DomainRepository {
         Domain createdDomain = mongoTemplate.findOne(query,Domain.class);
         createdDomain.setAppId(null);
         createdDomain.setClientSecret(HASH);
-        return Optional.of(createdDomain);
+        return Optional.ofNullable(createdDomain);
     }
 
     public void deleteDomain(String domainId){

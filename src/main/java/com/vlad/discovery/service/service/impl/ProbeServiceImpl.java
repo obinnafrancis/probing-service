@@ -4,6 +4,7 @@ import com.vlad.discovery.service.dao.ProbeServiceRepository;
 import com.vlad.discovery.service.dto.ServiceInformation;
 import com.vlad.discovery.service.model.BaseResponse;
 import com.vlad.discovery.service.model.ServiceModel;
+import com.vlad.discovery.service.service.Notifications;
 import com.vlad.discovery.service.service.ProbeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class ProbeServiceImpl implements ProbeService {
                         .url(serviceModel.getProbeUrl())
                         .createdDate(LocalDateTime.now())
                         .domainId("domainId")
+                        .stakeholders(serviceModel.getStakeholdersEmail())
                         .lastUpdatedOn(LocalDateTime.now())
                         .serviceName(serviceModel.getServiceName())
                         .statusFieldName(serviceModel.getStatusFIeldName())
@@ -46,6 +48,7 @@ public class ProbeServiceImpl implements ProbeService {
                         .domainId("domainId")
                         .lastUpdatedOn(LocalDateTime.now())
                         .serviceName(serviceModel.getServiceName())
+                        .stakeholders(serviceModel.getStakeholdersEmail())
                         .statusFieldName(serviceModel.getStatusFIeldName())
                         .statusExpectedValue(serviceModel.getExpectedValue())
                         .build();

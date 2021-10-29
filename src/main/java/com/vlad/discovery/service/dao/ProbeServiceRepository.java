@@ -42,7 +42,7 @@ public class ProbeServiceRepository {
         Criteria serviceNameCriteria = Criteria.where(NAME).is(serviceName);
         Criteria domainCriteria = Criteria.where(CLIENT_ID).is(domainId);
         Query query = new Query(new Criteria().andOperator(Arrays.asList(serviceNameCriteria,domainCriteria)));
-        return Optional.of(mongoTemplate.findOne(query,ServiceInformation.class));
+        return Optional.ofNullable(mongoTemplate.findOne(query,ServiceInformation.class));
     }
 
     public List<ServiceInformation>getAllServices(){
@@ -69,6 +69,7 @@ public class ProbeServiceRepository {
         Update update = new Update();
         update.set("lastUpdatedOn", LocalDateTime.now());
         update.set("down",serviceInformation.isDown());
+        update.set("downCount",serviceInformation.getDownCount());
         if (!Utils.isNullorEmpty(serviceInformation.getStatusFieldName())) update.set("statusFieldName",serviceInformation.getStatusFieldName());
         if (!Utils.isNullorEmpty(serviceInformation.getUrl())) update.set("url",serviceInformation.getUrl());
         if (!Utils.isNullorEmpty(serviceInformation.getStatusExpectedValue())) update.set("statusExpectedValue",serviceInformation.getStatusExpectedValue());

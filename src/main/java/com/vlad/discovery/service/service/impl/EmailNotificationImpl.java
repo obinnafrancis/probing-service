@@ -11,14 +11,14 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,12 +26,6 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
     @Autowired
     private Configuration freemarkerConfig;
     Map<String, String> detail=new HashMap();
-    @Autowired
-    private JavaMailSender javaMailSender;
-
-
-    @Autowired
-    Executor executor;
 
     @Autowired
     EmailConfig emailConfig;
@@ -49,14 +43,18 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
 
     @Override
     public EmailNotification generateNotification(ServiceInformation service) {
-
-
         //Set fields that will be displayed in the mail body
         detail.put("serviceId",service.getServiceId());
         detail.put("serviceName",service.getServiceName());
         detail.put("statusExpectedValue",service.getStatusExpectedValue());
         String mailBody=getTemplate(detail);
-      return EmailNotification.builder().mailBody(mailBody).build();
+        List<String> beneficiaries = Arrays.stream(service.getStakeholders().split(",")).collect(Collectors.toList());
+      return EmailNotification.builder()
+              .mailBody(mailBody)
+              .emailName("SERVICE NOTIFICATION")
+              .subject(service.getServiceName()+" STATUS NOTIFICATION")
+              .receivers(beneficiaries)
+              .build();
     }
 
     public  String getTemplate(Map data){

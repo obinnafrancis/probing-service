@@ -42,17 +42,17 @@
 			<artifactId>okhttp</artifactId>
 			<version>4.9.1</version>
 		</dependency>
-		<dependency>
-			<groupId>com.interswitchgroup</groupId>
-			<artifactId>finch-notification-core </artifactId>
-			<version>1.0.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.interswitchgroup</groupId>-->
+<!--			<artifactId>finch-notification-core </artifactId>-->
+<!--			<version>1.0.0</version>-->
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.tomcat.embed</groupId>-->
+<!--					<artifactId>tomcat-embed-core</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
