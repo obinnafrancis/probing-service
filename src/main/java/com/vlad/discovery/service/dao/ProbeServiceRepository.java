@@ -69,6 +69,7 @@ public class ProbeServiceRepository {
         Update update = new Update();
         update.set("lastUpdatedOn", LocalDateTime.now());
         update.set("down",serviceInformation.isDown());
+        update.set("downCount",serviceInformation.getDownCount());
         if (!Utils.isNullorEmpty(serviceInformation.getStatusFieldName())) update.set("statusFieldName",serviceInformation.getStatusFieldName());
         if (!Utils.isNullorEmpty(serviceInformation.getUrl())) update.set("url",serviceInformation.getUrl());
         if (!Utils.isNullorEmpty(serviceInformation.getStatusExpectedValue())) update.set("statusExpectedValue",serviceInformation.getStatusExpectedValue());

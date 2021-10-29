@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlad.discovery.service.dao.ProbeServiceRepository;
 import com.vlad.discovery.service.dto.ServiceInformation;
 import com.vlad.discovery.service.model.RemoteResponse;
+import com.vlad.discovery.service.service.Notifications;
 import com.vlad.discovery.service.util.RemoteCallUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class SystemSchedulers {
     ProbeServiceRepository probeServiceRepository;
     @Value("${max.down.threshold:6}")
     int maxDownThreshold;
+    @Autowired
+    private Notifications notifications;
 
     @Scheduled(fixedRate = 10000,initialDelay = 5000)
     public void probingTask(){
@@ -52,18 +55,21 @@ public class SystemSchedulers {
             serviceInformation.setDown(currentState);
             ServiceInformation newState = ServiceInformation.builder()
                     .domainId(serviceInformation.getDomainId())
-                    .down(serviceInformation.isDown())
+//                    .down(serviceInformation.isDown())
                     .downCount(serviceInformation.getDownCount()+1)
                     .serviceName(serviceInformation.getServiceName())
+                    .stakeholders(serviceInformation.getStakeholders())
                     .serviceId(serviceInformation.getServiceId())
                     .build();
             if(!currentState){
                 newState.setDownCount(0);
+                newState.setDown(currentState);
                 probeServiceRepository.updateService(newState);
                 sendMailOut(newState);
                 return;
             }
             if(currentState && serviceInformation.getDownCount()==maxDownThreshold){
+                newState.setDown(currentState);
                 probeServiceRepository.updateService(newState);
                 sendMailOut(newState);
                 return;
@@ -74,6 +80,7 @@ public class SystemSchedulers {
     }
 
     private void sendMailOut(ServiceInformation newState) {
+        notifications.send(notifications.generateNotification(newState));
         log.info("Mail Sent");
     }
 }

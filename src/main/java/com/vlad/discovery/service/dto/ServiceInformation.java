@@ -15,6 +15,7 @@ public class ServiceInformation {
     private transient String serviceId;
     private String domainId;
     private String serviceName;
+    private String stakeholders;
     private String statusFieldName;
     private String statusExpectedValue;
     private String url;
