@@ -5,15 +5,19 @@ import com.vlad.discovery.service.dto.ServiceInformation;
 import com.vlad.discovery.service.model.EmailNotification;
 import com.vlad.discovery.service.model.EmailResponse;
 import com.vlad.discovery.service.service.Notifications;
+import com.vlad.discovery.service.util.EmailUtil;
+import com.vlad.discovery.service.util.TemplateUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +30,12 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
     @Autowired
     private Configuration freemarkerConfig;
     Map<String, String> detail=new HashMap();
+    @Value("${default.mail.sender}")
+    private String fromEmail;
 
     @Autowired
-    EmailConfig emailConfig;
+    EmailUtil emailConfig;
+//    EmailConfig emailConfig;
 
     @Override
     public EmailResponse send(EmailNotification emailNotification) {
@@ -44,12 +51,14 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
     @Override
     public EmailNotification generateNotification(ServiceInformation service) {
         //Set fields that will be displayed in the mail body
-        detail.put("serviceId",service.getServiceId());
-        detail.put("serviceName",service.getServiceName());
-        detail.put("statusExpectedValue",service.getStatusExpectedValue());
+//        detail.put("serviceId",service.getServiceId());
+        detail.put("service",service.getServiceName());
+        detail.put("status",service.isDown()?"down":"up");
+        detail.put("date", LocalDateTime.now().toString());
         String mailBody=getTemplate(detail);
         List<String> beneficiaries = Arrays.stream(service.getStakeholders().split(",")).collect(Collectors.toList());
       return EmailNotification.builder()
+              .from(fromEmail)
               .mailBody(mailBody)
               .emailName("SERVICE NOTIFICATION")
               .subject(service.getServiceName()+" STATUS NOTIFICATION")
@@ -61,17 +70,15 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
 
         Template t = null;
         try {
-            t = freemarkerConfig.getTemplate("service-notification.ftl");
+            t = freemarkerConfig.getTemplate(TemplateUtil.DEFAULT_EMAIL_TEMPLATE_NAME);
         } catch (Exception e) {
             e.printStackTrace();
            // log.("{}", e);
-
         }
         String defaultEmailBody = "";
         try {
             defaultEmailBody = FreeMarkerTemplateUtils.processTemplateIntoString(t, data);
         } catch (Exception e) {
-
           //  log.error(" Error while generating template {}", e);
         }
 
