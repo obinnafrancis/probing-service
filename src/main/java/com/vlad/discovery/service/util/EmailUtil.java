@@ -1,88 +1,61 @@
-package com.vlad.discovery.service.config;
+package com.vlad.discovery.service.util;
 
 import com.vlad.discovery.service.model.EmailNotification;
 import com.vlad.discovery.service.model.EmailResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
-
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.List;
-import java.util.Properties;
 
 @Slf4j
 @Component
-public class EmailConfig {
-    @Value("${smtpip.email.host}")
-    private String smtpip;
-
-    @Value("${mail.user}")
-    private  String mailuser;
-
-    @Value("${mail.password}")
-    private String mailpassword;
-
-    @Value("${email.authentication.enabled}")
-    private boolean emailAuthEnable;
-
+public class EmailUtil {
     private static final String RESPONSE_SUCCESS="EMAIL SUCCESSFULLY PROCESSED";
     private static final String RESPONSE_FAILED="EMAIL FAILED";
 
+    @Autowired
+    @Qualifier("vladTransport")
+    private Transport transport;
+
+    @Autowired
+    @Qualifier("vladSession")
+    private Session session;
 
     public EmailResponse sendEmail(EmailNotification email){
-            try{
-            Properties props = new Properties();
-            Session mailSession = Session.getDefaultInstance(props, null);
-            MimeMessage message = new MimeMessage(mailSession);
+        try {
+            MimeMessage message = new MimeMessage(session);
             message.setSubject(email.getSubject());
-
-            message.setFrom(new InternetAddress(email.getFrom(),email.getEmailName()));
-
-            props.setProperty("mail.transport.protocol", "smtp");
-            props.setProperty("mail.host", smtpip);
-            if(emailAuthEnable) {
-                props.setProperty("mail.user", mailuser);
-                props.setProperty("mail.password", mailpassword);
-            }
-            Transport transport = mailSession.getTransport();
-            mailSession.setDebug(true);
-
-            BodyPart messageBodyPart = new MimeBodyPart();
-
-            MimeMultipart multipart = new MimeMultipart("related");
-            transport.connect();
-
-            messageBodyPart.setContent(email.getMailBody(), "text/html");
-            multipart.addBodyPart(messageBodyPart);
-            message.setContent(multipart);
-
-
+            message.setFrom(new InternetAddress(email.getFrom(),session.getProperties().getProperty("mail.smtp.user")));
             List<String> recipientList = email.getReceivers();
             InternetAddress[] recipientAddress = new InternetAddress[recipientList.size()];
             int counter = 0;
             for (String receiver : recipientList) {
                 recipientAddress[counter] = new InternetAddress(receiver.trim());
                 counter++;
-           }
+            }
             message.addRecipients(Message.RecipientType.TO, recipientAddress);
-
+            BodyPart messageBodyPart = new MimeBodyPart();
+            MimeMultipart multipart = new MimeMultipart("related");
+            messageBodyPart.setContent(email.getMailBody(), "text/html");
+            multipart.addBodyPart(messageBodyPart);
+            message.setContent(multipart);
+            transport.connect();
             transport.send(message);
-
+            transport.close();
             return EmailResponse.builder().response("00").message(RESPONSE_SUCCESS).build();
-
-        }catch(Exception ex) {
+        }catch (Exception e){
             log.error("Email sending failed for service {}",email.getSubject());
             return  EmailResponse.builder().response("99").message(RESPONSE_FAILED).build();
-
         }
-
     }
 }
