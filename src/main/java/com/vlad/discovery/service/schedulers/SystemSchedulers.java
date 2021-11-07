@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlad.discovery.service.dao.ProbeServiceRepository;
+import com.vlad.discovery.service.dao.TrackerRepository;
 import com.vlad.discovery.service.dto.ServiceInformation;
+import com.vlad.discovery.service.dto.ServiceTracker;
 import com.vlad.discovery.service.model.RemoteResponse;
 import com.vlad.discovery.service.service.Notifications;
 import com.vlad.discovery.service.util.RemoteCallUtil;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +27,8 @@ public class SystemSchedulers {
     RemoteCallUtil remoteCallUtil;
     @Autowired
     ProbeServiceRepository probeServiceRepository;
+    @Autowired
+    TrackerRepository trackerRepository;
     @Value("${max.down.threshold:6}")
     int maxDownThreshold;
     @Autowired
@@ -80,6 +86,7 @@ public class SystemSchedulers {
     }
 
     private void sendMailOut(ServiceInformation newState) {
+        trackerRepository.logRecord(ServiceTracker.builder().serviceName(newState.getServiceName()).status(newState.isDown()?"DOWN":"UP").timestamp(LocalDateTime.now()).build());
         notifications.send(notifications.generateNotification(newState));
         log.info("Mail Sent");
     }
