@@ -1,6 +1,5 @@
 package com.vlad.discovery.service.service.impl;
 
-import com.vlad.discovery.service.config.EmailConfig;
 import com.vlad.discovery.service.dto.ServiceInformation;
 import com.vlad.discovery.service.model.EmailNotification;
 import com.vlad.discovery.service.model.EmailResponse;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,19 +32,23 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
     Map<String, String> detail=new HashMap();
     @Value("${default.mail.sender}")
     private String fromEmail;
+    @Value("${service.down.image.uri}")
+    private String downIcon;
+    @Value("${service.up.image.uri}")
+    private String upIcon;
+
 
     @Autowired
-    EmailUtil emailConfig;
-//    EmailConfig emailConfig;
+    EmailUtil emailUtil;
 
     @Override
     public EmailResponse send(EmailNotification emailNotification) {
-           return  emailConfig.sendEmail(emailNotification);
+           return  emailUtil.sendEmail(emailNotification);
       }
 
     @Override
     public void sendAsync(EmailNotification emailNotification) {
-        emailConfig.sendEmail(emailNotification);
+        emailUtil.sendEmail(emailNotification);
     }
 
 
@@ -54,7 +58,8 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
 //        detail.put("serviceId",service.getServiceId());
         detail.put("service",service.getServiceName());
         detail.put("status",service.isDown()?"down":"up");
-        detail.put("date", LocalDateTime.now().toString());
+        detail.put("icon", service.isDown()?downIcon:upIcon);
+        detail.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString());
         String mailBody=getTemplate(detail);
         List<String> beneficiaries = Arrays.stream(service.getStakeholders().split(",")).collect(Collectors.toList());
       return EmailNotification.builder()
@@ -84,15 +89,14 @@ public class EmailNotificationImpl implements Notifications<EmailNotification> {
 
         return defaultEmailBody;
     }
-public EmailResponse pushEmail(EmailNotification notice){
+    public EmailResponse pushEmail(EmailNotification notice){
        EmailNotification emailnotice= generateNotification(notice.getServiceInformation());
        return send(emailnotice);
 
-}
+    }
 
     public void pushEmailAsync(EmailNotification notice) {
         EmailNotification emailnotice = generateNotification(notice.getServiceInformation());
         sendAsync(emailnotice);
     }
-
 }

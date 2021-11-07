@@ -15,9 +15,9 @@ public class JavaMailConfig {
     private String smtpPort;
     @Value("${smtp.STARTTLS.enable:false}")
     private boolean setTls;
-    @Value("${mail.user}")
+    @Value("${mail.smtp.user}")
     private  String mailuser;
-    @Value("${mail.password}")
+    @Value("${mail.smtp.password}")
     private String mailpassword;
     @Value("${use.smtp.port:false}")
     private boolean setPort;
@@ -49,8 +49,8 @@ public class JavaMailConfig {
             props.setProperty("mail.smtp.port",smtpPort);
         }
         if(emailAuthEnable){
-            props.setProperty("mail.smtp.user", mailuser);
-            props.setProperty("mail.smtp.password", mailpassword);
+            props.setProperty("mail.user", mailuser);
+            props.setProperty("mail.password", mailpassword);
         }
         return props;
     }
