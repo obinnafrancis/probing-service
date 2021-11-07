@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -62,7 +64,8 @@ public class EmailServiceTest {
                 .subject("Test Uptime")
                 .mailBody(generateUpTemplate())
                 .from("no-reply@mail.com")
-                .receivers(Collections.singletonList("ernefrancis@gmail.com"))
+//                .receivers(Collections.singletonList("ernefrancis@gmail.com"))
+                .receivers(Stream.of("nasaconcepts@yahoo.com","ernefrancis@gmail.com").collect(Collectors.toList()))
                 .build();
         EmailResponse emailResponse = emailNotification.send(email);
         log.info(new Gson().toJson(emailResponse));
@@ -76,7 +79,8 @@ public class EmailServiceTest {
                 .subject("Test Uptime")
                 .mailBody(generateDownTemplate())
                 .from("no-reply@mail.com")
-                .receivers(Collections.singletonList("ernefrancis@gmail.com"))
+                .receivers(Stream.of("nasaconcepts@yahoo.com","ernefrancis@gmail.com").collect(Collectors.toList()))
+//                .receivers(Collections.singletonList("ernefrancis@gmail.com"))
                 .build();
         EmailResponse emailResponse = emailNotification.send(email);
         log.info(new Gson().toJson(emailResponse));
