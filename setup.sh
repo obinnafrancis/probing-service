@@ -4,3 +4,4 @@ mkdir -p "/opt/probing-service"
 cd /opt/probing-service
 mkdir -p /log
 ln -s /log logs
+#

@@ -5,3 +5,4 @@ set -e
 cd /opt/probing-service/
 
 java -jar -Dspring.profile.active=docker probing-service.jar
+#
